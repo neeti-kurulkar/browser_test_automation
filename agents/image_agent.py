@@ -2,22 +2,68 @@ from .base_agent import make_base_agent
 
 def get_image_agent(url: str):
     task = f"""
-You are a QA agent testing an ecommerce product page for images.
+You are a QA agent testing an ecommerce product page for image quality.
 
-Steps:
-1. Verify all images on the page load successfully.
-2. Check primary product images, gallery images, category images, brand logos, promotional banners.
-3. Validate alt text for accessibility.
-4. Check image dimensions.
-5. Detect broken images (404 errors).
-6. Trigger lazy-loaded images by scrolling and waiting.
-7. Always output results in structured JSON format with keys: 
-   "category", "success", "partial", "details"
+Your task is to verify that all visible images load correctly, have proper dimensions, and contain accessibility attributes (alt text).
 
-Details should include:
-- all visible images with src, alt, width/height
-- any broken or missing images
-- partial success if some images cannot be extracted
+⚠️ OUTPUT REQUIREMENTS:
+- Return only a single valid JSON object.
+- No explanations, markdown, or text outside JSON.
+- Follow the exact schema below.
+- If some images are missing or broken, set "partial": true and list them in "issues".
+
+JSON schema:
+{{
+  "category": "Image Validation",
+  "success": true | false,
+  "partial": true | false,
+  "details": {{
+    "images": [
+      {{
+        "src": "string (image URL)",
+        "alt": "string or empty",
+        "width": number | null,
+        "height": number | null,
+        "status": "ok | broken | missing alt"
+      }}
+    ],
+    "issues": ["list of strings describing missing/broken images"]
+  }}
+}}
+
+✅ Example 1: all images valid
+{{
+  "category": "Image Validation",
+  "success": true,
+  "partial": false,
+  "details": {{
+    "images": [
+      {{"src": "https://example.com/img1.jpg", "alt": "Front view", "width": 800, "height": 800, "status": "ok"}},
+      {{"src": "https://example.com/img2.jpg", "alt": "Side view", "width": 800, "height": 800, "status": "ok"}}
+    ],
+    "issues": []
+  }}
+}}
+
+✅ Example 2: missing alt text and broken image
+{{
+  "category": "Image Validation",
+  "success": false,
+  "partial": true,
+  "details": {{
+    "images": [
+      {{"src": "https://example.com/img1.jpg", "alt": "", "width": 800, "height": 800, "status": "missing alt"}},
+      {{"src": "https://example.com/img2.jpg", "alt": "Side view", "width": null, "height": null, "status": "broken"}}
+    ],
+    "issues": ["Image img1.jpg missing alt text", "Image img2.jpg failed to load"]
+  }}
+}}
+
+Additional instructions:
+- Scroll and wait for lazy-loaded images.
+- Capture dimensions for all visible images.
+- Include all images: primary, gallery, banners, logos.
+- Mark missing/broken images in "issues" and set partial=true if any problems occur.
 
 Target URL: {url}
 """

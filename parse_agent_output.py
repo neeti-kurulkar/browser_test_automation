@@ -1,28 +1,28 @@
-import re
+import json
 
 def parse_agent_output(output_text: str, agent_type: str) -> dict:
     """
-    Converts agent CLI output into structured data for the reporter.
-    Returns a dict depending on agent_type: 'product', 'image', 'error'.
+    Converts agent output JSON string into structured dict.
+    Handles 'product', 'image', 'error' types.
+    Falls back to raw text if JSON parsing fails.
     """
-    if agent_type == "product":
-        data = {"title": None, "price": None, "description": None}
-        title = re.search(r"Product title: PRESENT \('(.+?)'\)", output_text)
-        price = re.search(r"Product price: PRESENT \('(.+?)'\)", output_text)
-        desc = re.search(r"Product description: (?:PRESENT|PARTIALLY PRESENT|MISSING).*?'?(.+?)'?\n", output_text, re.DOTALL)
-        if title:
-            data["title"] = title.group(1)
-        if price:
-            data["price"] = price.group(1)
-        if desc:
-            data["description"] = desc.group(1).strip()
+    try:
+        data = json.loads(output_text)
+        # Ensure essential keys exist
+        if "category" not in data:
+            data["category"] = agent_type.capitalize()
+        if "success" not in data:
+            data["success"] = False
+        if "partial" not in data:
+            data["partial"] = False
+        if "details" not in data:
+            data["details"] = {}
         return data
-
-    elif agent_type == "image":
-        # fallback: just return the raw output if extraction fails
-        return {"raw": output_text}
-
-    elif agent_type == "error":
-        return {"raw": output_text}
-
-    return {"raw": output_text}
+    except json.JSONDecodeError:
+        # fallback for non-JSON output
+        return {
+            "category": agent_type.capitalize(),
+            "success": False,
+            "partial": False,
+            "details": {"raw": output_text}
+        }
