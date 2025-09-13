@@ -14,7 +14,7 @@ This project is a browser-based QA automation system for ecommerce stores. It us
 
 ### 1. Clone the repository
 ```bash
-git clone <repo_url>
+git clone https://github.com/neeti-kurulkar/browser_test_automation
 cd browser_test_automation
 ```
 
