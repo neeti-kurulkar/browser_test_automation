@@ -45,7 +45,20 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-> **Note**: The project uses Browser-Use for browser automation. Please ensure you have the correct Python version and dependencies installed.
+### 5. Create environment file
+Create a `.env` file in the project root and add your OpenAI API key:
+
+```bash
+# Create .env file
+touch .env
+```
+
+Add the following to your `.env` file:
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+> **Note**: The project uses Browser-Use for browser automation and requires an OpenAI API key for the agentic QA models. Please ensure you have the correct Python version and dependencies installed.
 
 ## Running the QA Agents
 
